@@ -1,12 +1,12 @@
 import React from 'react';
 import { Heart, Trash2, ShoppingBag, ArrowLeft, ChevronRight } from 'lucide-react';
 import { useStore } from '../../store/useStore';
-import { PRODUCTS } from '../../data/products';
 
+// Displays saved wishlist items with quick cart addition and removal actions
 export const WishlistPage: React.FC = () => {
-  const { wishlist, toggleWishlist, addToCart, navigateTo } = useStore();
+  const { wishlist, toggleWishlist, addToCart, navigateTo, products } = useStore();
 
-  const wishlistedProducts = PRODUCTS.filter((p) => wishlist.includes(p.id));
+  const wishlistedProducts = products.filter((p) => wishlist.includes(p.id));
 
   return (
     <div className="w-full py-8 sm:py-12 bg-[#0C1618]">

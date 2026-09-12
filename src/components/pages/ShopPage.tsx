@@ -1,23 +1,26 @@
 import React, { useMemo } from 'react';
 import { Search, ChevronRight } from 'lucide-react';
 import { useStore } from '../../store/useStore';
-import { PRODUCTS } from '../../data/products';
 import { ProductGrid } from '../product/ProductGrid';
-import { ProductCategory } from '../../types';
 
+// Renders the catalog shop page with search, category filtering, and product grid
 export const ShopPage: React.FC = () => {
   const {
     selectedCategory,
     searchQuery,
     navigateTo,
+    products,
+    categories: storeCategories,
   } = useStore();
 
   const [localSearch, setLocalSearch] = React.useState(searchQuery);
   const [activeFilter, setActiveFilter] = React.useState<string>(selectedCategory || 'All');
 
-  const categories = ['All', 'Bags', 'Wallet', 'Keychains', 'Tshirts'];
+  const categories = useMemo(() => {
+    const names = storeCategories.map((c) => c.name);
+    return ['All', ...Array.from(new Set(names))];
+  }, [storeCategories]);
 
-  // Sync if store category changed
   React.useEffect(() => {
     if (selectedCategory) {
       setActiveFilter(selectedCategory);
@@ -25,16 +28,17 @@ export const ShopPage: React.FC = () => {
   }, [selectedCategory]);
 
   const filteredProducts = useMemo(() => {
-    return PRODUCTS.filter((product) => {
+    return products.filter((product) => {
       const matchCat =
-        activeFilter === 'All' || product.category === (activeFilter as ProductCategory);
+        activeFilter === 'All' ||
+        product.category?.toLowerCase() === activeFilter.toLowerCase();
       const matchSearch =
         localSearch.trim() === '' ||
         product.name.toLowerCase().includes(localSearch.toLowerCase()) ||
         product.description.toLowerCase().includes(localSearch.toLowerCase());
       return matchCat && matchSearch;
     });
-  }, [activeFilter, localSearch]);
+  }, [products, activeFilter, localSearch]);
 
   return (
     <div className="w-full py-8 sm:py-12 bg-[#0C1618]">
@@ -107,9 +111,8 @@ export const ShopPage: React.FC = () => {
           })}
         </div>
 
-        {/* Product Count & Results */}
         <div className="flex items-center justify-between text-xs text-[#94AFB5] mb-6">
-          <span>Showing {filteredProducts.length} of 15 products</span>
+          <span>Showing {filteredProducts.length} of {products.length} products</span>
           {activeFilter !== 'All' && (
             <span className="text-[#58C1C3]">Filtered by: {activeFilter}</span>
           )}

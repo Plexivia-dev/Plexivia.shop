@@ -18,7 +18,12 @@ import { AiChatbot } from './components/chat/AiChatbot';
 import { Toast } from './components/common/Toast';
 
 export default function App() {
-  const { activePage } = useStore();
+  const { activePage, fetchProducts, fetchCategories } = useStore();
+
+  useEffect(() => {
+    fetchProducts();
+    fetchCategories();
+  }, [fetchProducts, fetchCategories]);
 
   // Scroll to top on route change
   useEffect(() => {

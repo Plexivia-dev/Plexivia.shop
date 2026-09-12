@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { ChevronRight, ArrowLeft, CheckCircle2, ShieldCheck, CreditCard, Smartphone, Truck } from 'lucide-react';
+import { ChevronRight, ArrowLeft, CheckCircle2, ShieldCheck, CreditCard, Smartphone, Truck, Loader2 } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { CONFIG } from '../../config';
 
 export const CheckoutPage: React.FC = () => {
-  const { cart, getCartSubtotal, clearCart, navigateTo } = useStore();
+  const { cart, getCartSubtotal, navigateTo, submitOrder, isPlacingOrder } = useStore();
   const [isOrdered, setIsOrdered] = useState(false);
+  const [orderNumber, setOrderNumber] = useState('PLX-84920');
+  const [orderError, setOrderError] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'bkash' | 'card'>('cod');
 
   const [formData, setFormData] = useState({
@@ -22,10 +24,27 @@ export const CheckoutPage: React.FC = () => {
   const shipping = subtotal >= 2000 || subtotal === 0 ? 0 : 120;
   const total = subtotal + shipping;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsOrdered(true);
-    clearCart();
+    setOrderError(null);
+    try {
+      const res = await submitOrder({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+        city: formData.city,
+        postalCode: formData.postalCode,
+        paymentMethod,
+      });
+      if (res.orderId) {
+        setOrderNumber(res.orderId);
+      }
+      setIsOrdered(true);
+    } catch (err: any) {
+      setOrderError(err.message || 'Failed to place order. Please check inputs and try again.');
+    }
   };
 
   if (isOrdered) {
@@ -48,7 +67,7 @@ export const CheckoutPage: React.FC = () => {
           <div className="p-5 rounded-2xl bg-[#122225] border border-[#1E373D] text-left text-xs text-[#94AFB5] space-y-2 mb-8">
             <div className="flex justify-between">
               <span>Order Number:</span>
-              <span className="text-[#F5F7F7] font-mono">PLX-84920</span>
+              <span className="text-[#F5F7F7] font-mono">{orderNumber}</span>
             </div>
             <div className="flex justify-between">
               <span>Delivery Address:</span>
@@ -271,13 +290,28 @@ export const CheckoutPage: React.FC = () => {
               </div>
             </div>
 
+            {orderError && (
+              <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-medium">
+                {orderError}
+              </div>
+            )}
+
             <button
               type="submit"
-              disabled={cart.length === 0}
-              className="w-full py-4 bg-[#58C1C3] hover:bg-[#97CC6F] disabled:opacity-50 text-[#0C1618] font-bold text-base rounded-xl transition-all shadow-xl shadow-[#58C1C3]/20 flex items-center justify-center gap-2 cursor-pointer"
+              disabled={cart.length === 0 || isPlacingOrder}
+              className="w-full py-4 bg-[#58C1C3] hover:bg-[#97CC6F] disabled:opacity-50 text-[#0C1618] font-bold text-base rounded-xl transition-all shadow-xl shadow-[#58C1C3]/20 flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
             >
-              <ShieldCheck className="w-5 h-5" />
-              <span>Place Order (Demo Mode)</span>
+              {isPlacingOrder ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>Submitting Order...</span>
+                </>
+              ) : (
+                <>
+                  <ShieldCheck className="w-5 h-5" />
+                  <span>Place Order</span>
+                </>
+              )}
             </button>
           </form>
 

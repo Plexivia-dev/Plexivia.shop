@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { ChevronRight, ArrowLeft, Minus, Plus, ShoppingBag, Heart, Check, Share2 } from 'lucide-react';
 import { useStore } from '../../store/useStore';
-import { PRODUCTS } from '../../data/products';
 
+// Displays comprehensive product specifications, media preview, quantity selector, and cart actions
 export const ProductDetailsPage: React.FC = () => {
   const {
     selectedProductId,
@@ -11,21 +11,23 @@ export const ProductDetailsPage: React.FC = () => {
     toggleWishlist,
     isInWishlist,
     showNotification,
+    products,
   } = useStore();
 
   const [quantity, setQuantity] = useState(1);
   const [selectedThumb, setSelectedThumb] = useState(0);
 
-  // Fallback to first product if none selected
   const product =
-    PRODUCTS.find((p) => p.id === selectedProductId) || PRODUCTS[0];
+    products.find((p) => p.id === selectedProductId) || products[0];
 
   const isWishlisted = isInWishlist(product.id);
 
+  // Adds active product with chosen quantity to cart
   const handleAddToCart = () => {
     addToCart(product, quantity);
   };
 
+  // Shares current product URL or copies link to clipboard
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
@@ -39,10 +41,8 @@ export const ProductDetailsPage: React.FC = () => {
     }
   };
 
-  // Thumbnail variations based on primary 1:1 image
   const thumbnails = [
     product.image,
-    // Complementary angle / detail representation
     `${product.image}&sat=10`,
   ];
 

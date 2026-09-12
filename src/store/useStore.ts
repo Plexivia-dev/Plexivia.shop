@@ -1,6 +1,27 @@
 import { create } from 'zustand';
 import { Product, CartItem, UserProfile, PageView } from '../types';
-import { PRODUCTS } from '../data/products';
+import { PRODUCTS, CATEGORIES, CategoryInfo } from '../data/products';
+import {
+  apiGetProducts,
+  apiGetCategories,
+  apiCreateOrder,
+  apiSubmitContact,
+  resolveMediaUrl,
+  CreateOrderPayload,
+} from '../services/api';
+
+export interface CheckoutFormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  postalCode: string;
+  paymentMethod: 'cod' | 'bkash' | 'card' | string;
+  notes?: string;
+  couponCode?: string;
+}
 
 interface StoreState {
   // Navigation & Page State
@@ -9,6 +30,13 @@ interface StoreState {
   selectedCategory: string;
   searchQuery: string;
   navigateTo: (page: PageView, productId?: string, category?: string) => void;
+
+  // Products & Categories (Dynamic with fallback)
+  products: Product[];
+  categories: CategoryInfo[];
+  isLoadingProducts: boolean;
+  fetchProducts: () => Promise<void>;
+  fetchCategories: () => Promise<void>;
 
   // Cart State
   cart: CartItem[];
@@ -21,8 +49,29 @@ interface StoreState {
   getCartSubtotal: () => number;
   getCartItemCount: () => number;
 
+  // Checkout & Orders
+  isPlacingOrder: boolean;
+  submitOrder: (formData: CheckoutFormData) => Promise<{
+    success: boolean;
+    orderId?: string;
+    message?: string;
+  }>;
+
+  // Contact Form Submission
+  isSubmittingContact: boolean;
+  submitContactMessage: (data: {
+    name: string;
+    email: string;
+    phone?: string;
+    subject?: string;
+    message: string;
+  }) => Promise<{
+    success: boolean;
+    message?: string;
+  }>;
+
   // Wishlist State
-  wishlist: string[]; // array of product ids
+  wishlist: string[];
   toggleWishlist: (productId: string) => void;
   isInWishlist: (productId: string) => boolean;
 
@@ -63,9 +112,62 @@ export const useStore = create<StoreState>((set, get) => ({
     });
   },
 
+  // Products & Categories
+  products: PRODUCTS,
+  categories: CATEGORIES,
+  isLoadingProducts: false,
+  fetchProducts: async () => {
+    set({ isLoadingProducts: true });
+    try {
+      const res = await apiGetProducts({ limit: 100 });
+      const rawList = res?.data || (Array.isArray(res) ? res : []);
+      if (Array.isArray(rawList) && rawList.length > 0) {
+        const mapped: Product[] = rawList.map((p: any) => ({
+          id: String(p._id || p.id),
+          name: p.name || 'Product',
+          category: (p.category?.name || p.category || 'Bags') as any,
+          price: Number(p.salePrice || p.price || 0),
+          priceFormatted: `৳ ${Number(p.salePrice || p.price || 0).toLocaleString()}`,
+          image: resolveMediaUrl(
+            p.imageUrl || p.images?.[0] || 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=800&h=800&q=80'
+          ),
+          description: p.description || p.shortDescription || '',
+          features: Array.isArray(p.features)
+            ? p.features
+            : p.specifications
+            ? Object.entries(p.specifications).map(([k, v]) => `${k}: ${v}`)
+            : [],
+          inStock: p.stockStatus === 'instock' || (p.totalStock !== undefined ? p.totalStock > 0 : true),
+          featured: Boolean(p.isFeatured || p.featured),
+        }));
+        set({ products: mapped, isLoadingProducts: false });
+      } else {
+        set({ isLoadingProducts: false });
+      }
+    } catch {
+      set({ isLoadingProducts: false });
+    }
+  },
+  fetchCategories: async () => {
+    try {
+      const res = await apiGetCategories();
+      const rawList = res?.data || (Array.isArray(res) ? res : []);
+      if (Array.isArray(rawList) && rawList.length > 0) {
+        const mapped: CategoryInfo[] = rawList.map((c: any) => ({
+          id: (c.name || c.id) as any,
+          name: c.name || 'Category',
+          itemCount: Number(c.productCount || c.itemCount || 0),
+          image: resolveMediaUrl(
+            c.imageUrl || c.image || 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=800&h=800&q=80'
+          ),
+        }));
+        set({ categories: mapped });
+      }
+    } catch {}
+  },
+
   // Cart
   cart: [
-    // Pre-populate with a demo item for immediate delight as shown in mockup
     { product: PRODUCTS[0], quantity: 1 },
     { product: PRODUCTS[5], quantity: 1 },
   ],
@@ -115,11 +217,82 @@ export const useStore = create<StoreState>((set, get) => ({
     return get().cart.reduce((sum, item) => sum + item.quantity, 0);
   },
 
+  // Checkout & Orders
+  isPlacingOrder: false,
+  submitOrder: async (formData: CheckoutFormData) => {
+    const { cart, getCartSubtotal } = get();
+    const subtotal = getCartSubtotal();
+    const shippingCost = subtotal >= 2000 || subtotal === 0 ? 0 : 120;
+    const total = subtotal + shippingCost;
+
+    const payload: CreateOrderPayload = {
+      billingInfo: {
+        fullName: `${formData.firstName} ${formData.lastName}`.trim(),
+        phone: formData.phone,
+        email: formData.email,
+        address: formData.address,
+        district: formData.city,
+        postalCode: formData.postalCode,
+      },
+      items: cart.map((item) => ({
+        productId: item.product.id,
+        name: item.product.name,
+        quantity: item.quantity,
+        price: item.product.price,
+        subtotal: item.product.price * item.quantity,
+        image: item.product.image,
+      })),
+      paymentMethod: formData.paymentMethod,
+      subtotal,
+      shippingCost,
+      total,
+      notes: formData.notes,
+      couponCode: formData.couponCode,
+    };
+
+    set({ isPlacingOrder: true });
+    try {
+      const res = await apiCreateOrder(payload);
+      get().clearCart();
+      set({ isPlacingOrder: false });
+      const orderId =
+        res.data?.orderNumber ||
+        res.data?._id ||
+        res.orderNumber ||
+        `PLX-${Math.floor(10000 + Math.random() * 90000)}`;
+      return {
+        success: true,
+        orderId,
+        message: res.message || 'Order placed successfully!',
+      };
+    } catch (err: any) {
+      set({ isPlacingOrder: false });
+      throw err;
+    }
+  },
+
+  // Contact Form Submission
+  isSubmittingContact: false,
+  submitContactMessage: async (data) => {
+    set({ isSubmittingContact: true });
+    try {
+      const res = await apiSubmitContact(data);
+      set({ isSubmittingContact: false });
+      return {
+        success: true,
+        message: res.message || 'Thank you! Your message has been sent successfully.',
+      };
+    } catch (err: any) {
+      set({ isSubmittingContact: false });
+      throw err;
+    }
+  },
+
   // Wishlist
   wishlist: ['tote-bag', 'cute-bunny-keychain'],
   toggleWishlist: (productId) => {
     const isPresent = get().wishlist.includes(productId);
-    const product = PRODUCTS.find((p) => p.id === productId);
+    const product = get().products.find((p) => p.id === productId);
     if (isPresent) {
       set((state) => ({
         wishlist: state.wishlist.filter((id) => id !== productId),

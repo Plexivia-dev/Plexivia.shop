@@ -3,11 +3,12 @@ import { PlexiviaLogo } from '../common/PlexiviaLogo';
 import { DemoBookingButton } from '../common/DemoBookingButton';
 import { WhatsAppButton } from '../common/WhatsAppButton';
 import { useStore } from '../../store/useStore';
-import { CATEGORIES } from '../../data/products';
 import { PageView, ProductCategory } from '../../types';
 
+// Renders the global footer with agency positioning, navigation links, and dynamic categories
 export const Footer: React.FC = () => {
   const navigateTo = useStore((state) => state.navigateTo);
+  const categories = useStore((state) => state.categories);
 
   const quickLinks: Array<{ label: string; page: PageView }> = [
     { label: 'Home', page: 'home' },
@@ -56,13 +57,13 @@ export const Footer: React.FC = () => {
               Categories
             </h4>
             <ul className="space-y-2 text-xs">
-              {CATEGORIES.map((cat) => (
+              {categories.map((cat) => (
                 <li key={cat.id}>
                   <button
                     onClick={() => navigateTo('shop', undefined, cat.id)}
                     className="hover:text-[#58C1C3] transition-colors cursor-pointer"
                   >
-                    {cat.name} ({cat.itemCount} items)
+                    {cat.name}
                   </button>
                 </li>
               ))}

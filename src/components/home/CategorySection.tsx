@@ -1,12 +1,14 @@
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
-import { CATEGORIES } from '../../data/products';
 import { useStore } from '../../store/useStore';
 import { ProductCategory } from '../../types';
 
+// Renders category showcase cards allowing user to filter products by category
 export const CategorySection: React.FC = () => {
   const navigateTo = useStore((state) => state.navigateTo);
+  const categories = useStore((state) => state.categories);
 
+  // Navigates storefront to shop view with active category filter
   const handleSelectCategory = (categoryId: ProductCategory) => {
     navigateTo('shop', undefined, categoryId);
   };
@@ -24,9 +26,8 @@ export const CategorySection: React.FC = () => {
           </p>
         </div>
 
-        {/* 4 Category Cards Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-          {CATEGORIES.map((cat) => (
+          {categories.map((cat) => (
             <div
               key={cat.id}
               onClick={() => handleSelectCategory(cat.id)}

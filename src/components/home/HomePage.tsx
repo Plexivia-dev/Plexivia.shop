@@ -5,16 +5,15 @@ import { CategorySection } from './CategorySection';
 import { ProductGrid } from '../product/ProductGrid';
 import { DemoCTA } from './DemoCTA';
 import { AboutSection } from './AboutSection';
-import { PRODUCTS } from '../../data/products';
 import { useStore } from '../../store/useStore';
 
+// Displays the primary storefront homepage with hero showcase, features, and product categories
 export const HomePage: React.FC = () => {
   const navigateTo = useStore((state) => state.navigateTo);
+  const products = useStore((state) => state.products);
 
-  // Curate 4 featured items for the homepage hero showcase
-  const featuredProducts = PRODUCTS.filter((p) => p.featured).slice(0, 4);
-  // Curate 4 new arrival items
-  const newArrivals = PRODUCTS.filter((p) => !p.featured).slice(0, 4);
+  const featuredProducts = products.filter((p) => p.featured).slice(0, 4);
+  const newArrivals = products.filter((p) => !p.featured).slice(0, 4);
 
   return (
     <div className="w-full bg-[#0C1618]">

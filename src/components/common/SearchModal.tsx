@@ -1,22 +1,22 @@
 import React, { useState, useMemo } from 'react';
 import { Search, X, ArrowRight } from 'lucide-react';
 import { useStore } from '../../store/useStore';
-import { PRODUCTS } from '../../data/products';
 
+// Renders the global search modal allowing real-time product discovery across all catalog entries
 export const SearchModal: React.FC = () => {
-  const { isSearchOpen, setIsSearchOpen, navigateTo } = useStore();
+  const { isSearchOpen, setIsSearchOpen, navigateTo, products } = useStore();
   const [query, setQuery] = useState('');
 
   const filtered = useMemo(() => {
     if (!query.trim()) return [];
     const q = query.toLowerCase();
-    return PRODUCTS.filter(
+    return products.filter(
       (p) =>
         p.name.toLowerCase().includes(q) ||
         p.category.toLowerCase().includes(q) ||
         p.description.toLowerCase().includes(q)
     );
-  }, [query]);
+  }, [query, products]);
 
   if (!isSearchOpen) return null;
 
@@ -50,7 +50,7 @@ export const SearchModal: React.FC = () => {
         <div className="mt-4 max-h-[60vh] overflow-y-auto space-y-2">
           {query.trim() === '' ? (
             <div className="py-6 text-center text-xs text-[#94AFB5]">
-              Type a product name from our 15 curated items
+              Type a product name to search our catalog
             </div>
           ) : filtered.length === 0 ? (
             <div className="py-6 text-center text-xs text-[#94AFB5]">

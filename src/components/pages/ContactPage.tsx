@@ -1,22 +1,35 @@
 import React, { useState } from 'react';
-import { ChevronRight, Mail, Send, CheckCircle2, MessageCircle, Calendar } from 'lucide-react';
+import { ChevronRight, Mail, Send, CheckCircle2, MessageCircle, Calendar, Loader2 } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { DemoBookingButton } from '../common/DemoBookingButton';
 import { WhatsAppButton } from '../common/WhatsAppButton';
 
+// Renders the contact inquiry page with direct contact options and submission form
 export const ContactPage: React.FC = () => {
-  const { navigateTo, showNotification } = useStore();
+  const { navigateTo, showNotification, submitContactMessage, isSubmittingContact } = useStore();
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     message: '',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Handles contact form submission to the central backend API
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitted(true);
-    showNotification('Thank you! Your message has been received.');
+    setErrorMessage('');
+    try {
+      await submitContactMessage({
+        name: formData.name,
+        email: formData.email,
+        message: formData.message,
+      });
+      setIsSubmitted(true);
+      showNotification('Thank you! Your message has been received.');
+    } catch (err: any) {
+      setErrorMessage(err.message || 'Failed to submit message. Please try again.');
+    }
   };
 
   return (
@@ -131,12 +144,28 @@ export const ContactPage: React.FC = () => {
                   />
                 </div>
 
+                {errorMessage && (
+                  <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-xs">
+                    {errorMessage}
+                  </div>
+                )}
+
                 <button
                   type="submit"
-                  className="w-full py-3.5 bg-[#58C1C3] hover:bg-[#97CC6F] text-[#0C1618] font-bold text-sm rounded-xl transition-all shadow-lg shadow-[#58C1C3]/20 flex items-center justify-center gap-2 cursor-pointer"
+                  disabled={isSubmittingContact}
+                  className="w-full py-3.5 bg-[#58C1C3] hover:bg-[#97CC6F] text-[#0C1618] font-bold text-sm rounded-xl transition-all shadow-lg shadow-[#58C1C3]/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <Send className="w-4 h-4" />
-                  <span>Send Message</span>
+                  {isSubmittingContact ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Sending Message...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4" />
+                      <span>Send Message</span>
+                    </>
+                  )}
                 </button>
               </form>
             ) : (

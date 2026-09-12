@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Tag, Sparkles, Truck, Copy, Check, ChevronRight, ArrowRight } from 'lucide-react';
 import { useStore } from '../../store/useStore';
-import { PRODUCTS } from '../../data/products';
 
+// Renders seasonal promotional discounts, coupon codes, and shipping incentives
 export const OffersPage: React.FC = () => {
   const { navigateTo, showNotification, addToCart } = useStore();
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
