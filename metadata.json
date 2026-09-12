@@ -1,0 +1,7 @@
+{
+  "name": "PLEXIVIA – Crafting Digital Dreams",
+  "description": "Premium, modern, fully responsive e-commerce experience for PLEXIVIA featuring curated lifestyle essentials and Gemini AI shopping assistant.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+

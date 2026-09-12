@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
+  --color-plexivia-dark: #0C1618;
+  --color-plexivia-surface: #122225;
+  --color-plexivia-card: #15272B;
+  --color-plexivia-border: #1E373D;
+  --color-plexivia-border-light: #284A52;
+  --color-plexivia-cyan: #58C1C3;
+  --color-plexivia-green: #97CC6F;
+  --color-plexivia-white: #F5F7F7;
+  --color-plexivia-muted: #94AFB5;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  background-color: #0C1618;
+  color: #F5F7F7;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0C1618;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1F383D;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #58C1C3;
+}
+
