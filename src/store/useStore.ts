@@ -1,8 +1,9 @@
 import { create } from 'zustand';
-import { Product, CartItem, UserProfile, PageView } from '../types';
+import { Product, CartItem, UserProfile, PageView, SiteConfig } from '../types';
 import { PRODUCTS, CATEGORIES, CategoryInfo } from '../data/products';
 import {
   apiGetProducts,
+  apiGetSiteConfig,
   apiGetCategories,
   apiCreateOrder,
   apiSubmitContact,
@@ -36,6 +37,8 @@ interface StoreState {
   categories: CategoryInfo[];
   isLoadingProducts: boolean;
   fetchProducts: () => Promise<void>;
+  siteConfig: SiteConfig | null;
+  fetchSiteConfig: () => Promise<void>;
   fetchCategories: () => Promise<void>;
 
   // Cart State
@@ -122,24 +125,33 @@ export const useStore = create<StoreState>((set, get) => ({
       const res = await apiGetProducts({ limit: 100 });
       const rawList = res?.data || (Array.isArray(res) ? res : []);
       if (Array.isArray(rawList) && rawList.length > 0) {
-        const mapped: Product[] = rawList.map((p: any) => ({
-          id: String(p._id || p.id),
-          name: p.name || 'Product',
-          category: (p.category?.name || p.category || 'Bags') as any,
-          price: Number(p.salePrice || p.price || 0),
-          priceFormatted: `৳ ${Number(p.salePrice || p.price || 0).toLocaleString()}`,
-          image: resolveMediaUrl(
-            p.imageUrl || p.images?.[0] || 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=800&h=800&q=80'
-          ),
-          description: p.description || p.shortDescription || '',
-          features: Array.isArray(p.features)
-            ? p.features
-            : p.specifications
-            ? Object.entries(p.specifications).map(([k, v]) => `${k}: ${v}`)
-            : [],
-          inStock: p.stockStatus === 'instock' || (p.totalStock !== undefined ? p.totalStock > 0 : true),
-          featured: Boolean(p.isFeatured || p.featured),
-        }));
+        const mapped: Product[] = rawList.map((p: any) => {
+          const rawCategory =
+            (Array.isArray(p.categories) && p.categories[0]?.name) ||
+            p.category?.name ||
+            p.category ||
+            'General';
+          const finalPrice = Number(p.offerPrice || p.salePrice || p.price || 0);
+          const rawImg = p.imageUrl || p.thumbnailUrl || (Array.isArray(p.images) ? p.images[0] : null);
+          return {
+            id: String(p._id || p.id),
+            name: p.name || 'Product',
+            category: rawCategory as any,
+            price: finalPrice,
+            priceFormatted: `৳ ${finalPrice.toLocaleString()}`,
+            image: rawImg
+              ? resolveMediaUrl(rawImg)
+              : 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=800&h=800&q=80',
+            description: p.description || p.longDescription || p.shortDescription || '',
+            features: Array.isArray(p.features)
+              ? p.features
+              : p.specifications
+              ? Object.entries(p.specifications).map(([k, v]) => `${k}: ${v}`)
+              : [],
+            inStock: p.stockStatus === 'instock' || (p.totalStock !== undefined ? p.totalStock > 0 : true),
+            featured: Boolean(p.isFeatured || p.featured),
+          };
+        });
         set({ products: mapped, isLoadingProducts: false });
       } else {
         set({ isLoadingProducts: false });
@@ -147,6 +159,56 @@ export const useStore = create<StoreState>((set, get) => ({
     } catch {
       set({ isLoadingProducts: false });
     }
+  },
+  siteConfig: null,
+  fetchSiteConfig: async () => {
+    try {
+      const config = await apiGetSiteConfig();
+      if (config) {
+        set({ siteConfig: config });
+        if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+          if (config.themeColors) {
+            const root = document.documentElement;
+            if (config.themeColors.primaryColor) {
+              root.style.setProperty('--color-plexivia-cyan', config.themeColors.primaryColor);
+            }
+            if (config.themeColors.secondaryColor) {
+              root.style.setProperty('--color-plexivia-green', config.themeColors.secondaryColor);
+            }
+            if (config.themeColors.darkBgColor) {
+              root.style.setProperty('--color-plexivia-dark', config.themeColors.darkBgColor);
+            }
+            if (config.themeColors.surfaceColor) {
+              root.style.setProperty('--color-plexivia-surface', config.themeColors.surfaceColor);
+            }
+            if (config.themeColors.cardColor) {
+              root.style.setProperty('--color-plexivia-card', config.themeColors.cardColor);
+            }
+            if (config.themeColors.borderColor) {
+              root.style.setProperty('--color-plexivia-border', config.themeColors.borderColor);
+            }
+            if (config.themeColors.textColor) {
+              root.style.setProperty('--color-plexivia-white', config.themeColors.textColor);
+            }
+            if (config.themeColors.mutedColor) {
+              root.style.setProperty('--color-plexivia-muted', config.themeColors.mutedColor);
+            }
+          }
+          if (config.general?.siteName) {
+            document.title = `${config.general.siteName} – ${config.general.tagline || 'Crafting Digital Dreams'}`;
+          }
+          if (config.branding?.faviconUrl) {
+            let link = document.querySelector("link[rel~='icon']");
+            if (!link) {
+              link = document.createElement('link');
+              link.rel = 'icon';
+              document.head.appendChild(link);
+            }
+            link.href = config.branding.faviconUrl;
+          }
+        }
+      }
+    } catch {}
   },
   fetchCategories: async () => {
     try {

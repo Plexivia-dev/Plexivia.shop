@@ -129,7 +129,7 @@ export const PRODUCTS: Product[] = [
     category: 'Wallet',
     price: 1250,
     priceFormatted: '৳ 1,250',
-    image: 'https://images.unsplash.com/photo-1517254793880-056705c3c338?auto=format&fit=crop&w=800&h=800&q=80',
+    image: 'https://images.unsplash.com/photo-1554412933-514a83d2f3c8?auto=format&fit=crop&w=800&h=800&q=80',
     description: 'Classic dark leather bifold wallet with multi-card slots and bill divider.',
     features: ['RFID protection shield', '8 card slots + dual currency fold', 'Slim hand-stitched border'],
     inStock: true,

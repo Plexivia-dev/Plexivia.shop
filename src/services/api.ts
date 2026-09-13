@@ -23,6 +23,30 @@ export const getDynamicLogoUrl = (): string => {
   return version ? `${baseLogo}?v=${version}` : baseLogo;
 };
 
+// Fetches the live logo metadata and cache-busting timestamp from backend
+export const apiGetLogoInfo = async (): Promise<{ logoUrl: string; version: number } | null> => {
+  try {
+    const cleanBase = API_BASE_URL.replace(/\/$/, '');
+    const res = await fetch(`${cleanBase}/api/v1/assets/logo-info`);
+    if (!res.ok) return null;
+    const json = await res.json();
+    if (json.status === 'success' && json.data) {
+      if (typeof window !== 'undefined' && json.data.version) {
+        localStorage.setItem('brand_logo_version', String(json.data.version));
+      }
+      const rawPath = json.data.relativePath || '/uploads/assets/logo.webp';
+      const version = json.data.version || Date.now();
+      return {
+        logoUrl: `${resolveMediaUrl(rawPath)}?v=${version}`,
+        version,
+      };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+};
+
 export interface ApiResponse<T> {
   status?: string;
   success?: boolean;
@@ -164,4 +188,17 @@ export const apiSubscribeNewsletter = async (email: string) => {
     throw new Error(data.message || data.error || 'Failed to subscribe');
   }
   return data;
+};
+
+// Fetches public site configuration including theme colors, branding, and banners
+export const apiGetSiteConfig = async (): Promise<any> => {
+  try {
+    const cleanBase = API_BASE_URL.replace(/\/$/, '');
+    const res = await fetch(`${cleanBase}/api/v1/public/site-config`);
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json?.data || null;
+  } catch {
+    return null;
+  }
 };

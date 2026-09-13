@@ -41,3 +41,56 @@ export interface ChatMessage {
   role: 'user' | 'model';
   content: string;
 }
+
+export interface SiteConfig {
+  general?: {
+    siteName?: string;
+    tagline?: string;
+    notificationEmail?: string;
+    contactEmail?: string;
+    phone?: string;
+    whatsappNumber?: string;
+    currencySymbol?: string;
+  };
+  themeColors?: {
+    primaryColor?: string;
+    secondaryColor?: string;
+    accentColor?: string;
+    darkBgColor?: string;
+    surfaceColor?: string;
+    cardColor?: string;
+    borderColor?: string;
+    textColor?: string;
+    mutedColor?: string;
+  };
+  branding?: {
+    logoUrl?: string;
+    darkLogoUrl?: string;
+    faviconUrl?: string;
+    showTagline?: boolean;
+  };
+  banners?: {
+    heroBanners?: Array<{
+      id?: string;
+      title?: string;
+      subtitle?: string;
+      badge?: string;
+      imageUrl?: string;
+      ctaText?: string;
+      ctaLink?: string;
+      secondaryCtaText?: string;
+    }>;
+    aboutBanner?: {
+      title?: string;
+      subtitle?: string;
+      description?: string;
+      imageUrl?: string;
+    };
+    promoBanner?: {
+      enabled?: boolean;
+      badge?: string;
+      text?: string;
+      link?: string;
+    };
+  };
+}

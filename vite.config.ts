@@ -9,6 +9,7 @@ export default defineConfig(() => {
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
+        '@themes': path.resolve(__dirname, './themes'),
       },
     },
     server: {
