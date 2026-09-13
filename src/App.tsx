@@ -17,7 +17,8 @@ import { CalendarModal } from './components/common/CalendarModal';
 import { AiChatbot } from './components/chat/AiChatbot';
 import { Toast } from './components/common/Toast';
 
-export default function App() {
+// Root storefront application managing page routing, site config initialization, and modals
+const App: React.FC = () => {
   const { activePage, fetchProducts, fetchCategories, fetchSiteConfig } = useStore();
 
   useEffect(() => {
@@ -26,20 +27,14 @@ export default function App() {
     fetchCategories();
   }, [fetchSiteConfig, fetchProducts, fetchCategories]);
 
-  // Scroll to top on route change
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [activePage]);
 
   return (
     <div className="min-h-screen bg-[#0C1618] text-[#F5F7F7] flex flex-col font-sans selection:bg-[#58C1C3]/30 selection:text-[#58C1C3]">
-      {/* Toast Feedback */}
       <Toast />
-
-      {/* Global Header (3 Levels + Mobile Drawer) */}
       <Header />
-
-      {/* Main Content Area */}
       <main className="flex-1 w-full">
         {activePage === 'home' && <HomePage />}
         {activePage === 'shop' && <ShopPage />}
@@ -50,20 +45,15 @@ export default function App() {
         {activePage === 'wishlist' && <WishlistPage />}
         {activePage === 'checkout' && <CheckoutPage />}
       </main>
-
-      {/* Global Footer */}
       <Footer />
-
-      {/* Slide-over Cart Drawer */}
       <CartDrawer />
-
-      {/* Modals & Drawers */}
       <ProfileModal />
       <SearchModal />
       <CalendarModal />
-
-      {/* Floating AI Shopping Assistant */}
       <AiChatbot />
     </div>
   );
-}
+};
+
+export default App;
+

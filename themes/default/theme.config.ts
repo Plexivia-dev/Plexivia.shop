@@ -10,11 +10,12 @@ export const defaultConfig: ThemeConfig = {
   colors: {
     primary: '#58C1C3',
     secondary: '#97CC6F',
-    accent: '#58C1C3',
+    accent: '#97CC6F',
     background: '#0C1618',
     surface: '#122225',
     textPrimary: '#F5F7F7',
     textSecondary: '#94AFB5',
     border: '#1E373D',
+    error: '#EF4444',
   },
 };

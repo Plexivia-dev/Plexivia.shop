@@ -62,6 +62,7 @@ export interface SiteConfig {
     borderColor?: string;
     textColor?: string;
     mutedColor?: string;
+    errorColor?: string;
   };
   branding?: {
     logoUrl?: string;

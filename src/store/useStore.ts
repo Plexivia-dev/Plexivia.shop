@@ -24,6 +24,11 @@ export interface CheckoutFormData {
   couponCode?: string;
 }
 
+export interface ToastNotification {
+  message: string;
+  type: 'success' | 'error' | 'info';
+}
+
 interface StoreState {
   // Navigation & Page State
   activePage: PageView;
@@ -95,8 +100,9 @@ interface StoreState {
   setIsCalendarModalOpen: (open: boolean) => void;
 
   // Micro feedback
-  notification: string | null;
-  showNotification: (msg: string) => void;
+  notification: ToastNotification | null;
+  showNotification: (msg: string, type?: 'success' | 'error' | 'info') => void;
+  showError: (msg: string) => void;
 }
 
 export const useStore = create<StoreState>((set, get) => ({
@@ -192,6 +198,9 @@ export const useStore = create<StoreState>((set, get) => ({
             }
             if (config.themeColors.mutedColor) {
               root.style.setProperty('--color-plexivia-muted', config.themeColors.mutedColor);
+            }
+            if (config.themeColors.errorColor) {
+              root.style.setProperty('--color-plexivia-error', config.themeColors.errorColor);
             }
           }
           if (config.general?.siteName) {
@@ -402,10 +411,16 @@ export const useStore = create<StoreState>((set, get) => ({
 
   // Micro feedback
   notification: null,
-  showNotification: (msg) => {
-    set({ notification: msg });
+  showNotification: (msg, type = 'success') => {
+    set({ notification: { message: msg, type } });
     setTimeout(() => {
       set({ notification: null });
-    }, 2500);
+    }, 2800);
+  },
+  showError: (msg) => {
+    set({ notification: { message: msg, type: 'error' } });
+    setTimeout(() => {
+      set({ notification: null });
+    }, 3500);
   },
 }));

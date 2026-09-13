@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { ChevronRight, ArrowLeft, CheckCircle2, ShieldCheck, CreditCard, Smartphone, Truck, Loader2 } from 'lucide-react';
+import { ChevronRight, ArrowLeft, CheckCircle2, ShieldCheck, CreditCard, Smartphone, Truck, Loader2, AlertCircle } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { CONFIG } from '../../config';
 
+// Renders checkout form, delivery details, and order payment processing
 export const CheckoutPage: React.FC = () => {
   const { cart, getCartSubtotal, navigateTo, submitOrder, isPlacingOrder } = useStore();
   const [isOrdered, setIsOrdered] = useState(false);
@@ -291,8 +292,9 @@ export const CheckoutPage: React.FC = () => {
             </div>
 
             {orderError && (
-              <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-medium">
-                {orderError}
+              <div className="p-3.5 rounded-xl bg-[#EF4444]/10 border border-[#EF4444]/30 text-[#EF4444] text-xs font-medium flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                <span>{orderError}</span>
               </div>
             )}
 

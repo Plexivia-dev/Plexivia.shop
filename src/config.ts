@@ -7,13 +7,17 @@ export const CONFIG = {
     name: 'PLEXIVIA',
     tagline: 'Crafting Digital Dreams',
     colors: {
+      background: '#0C1618',
       dark: '#0C1618',
       surface: '#122225',
       card: '#15272B',
       border: '#1E373D',
       cyan: '#58C1C3',
+      primary: '#58C1C3',
       green: '#97CC6F',
+      accent: '#97CC6F',
       white: '#F5F7F7',
+      error: '#EF4444',
     },
   },
   // Reusable Google Calendar Booking URL (configured via env or fallback)

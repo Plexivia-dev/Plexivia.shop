@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronRight, Mail, Send, CheckCircle2, MessageCircle, Calendar, Loader2 } from 'lucide-react';
+import { ChevronRight, Mail, Send, CheckCircle2, MessageCircle, Calendar, Loader2, AlertCircle } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { DemoBookingButton } from '../common/DemoBookingButton';
 import { WhatsAppButton } from '../common/WhatsAppButton';
@@ -145,8 +145,9 @@ export const ContactPage: React.FC = () => {
                 </div>
 
                 {errorMessage && (
-                  <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-xs">
-                    {errorMessage}
+                  <div className="p-3 bg-[#EF4444]/10 border border-[#EF4444]/30 rounded-xl text-[#EF4444] text-xs flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                    <span>{errorMessage}</span>
                   </div>
                 )}
 

@@ -11,6 +11,7 @@ export interface ThemeColors {
   textPrimary: string;
   textSecondary: string;
   border: string;
+  error?: string;
 }
 
 export interface ThemeConfig {
