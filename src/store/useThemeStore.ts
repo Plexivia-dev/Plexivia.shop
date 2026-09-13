@@ -11,15 +11,15 @@ const getInitialTheme = (): ThemeId => {
   if (typeof window !== 'undefined') {
     const urlParams = new URLSearchParams(window.location.search);
     const paramTheme = urlParams.get('theme') as ThemeId;
-    if (paramTheme === 'luxury-1' || paramTheme === 'default') {
+    if (paramTheme === 'engulfic' || paramTheme === 'default' || paramTheme === 'luxury-1') {
       return paramTheme;
     }
     const stored = localStorage.getItem('app_theme') as ThemeId;
-    if (stored === 'luxury-1' || stored === 'default') {
+    if (stored === 'engulfic' || stored === 'default' || stored === 'luxury-1') {
       return stored;
     }
   }
-  return 'luxury-1';
+  return 'default';
 };
 
 // Global theme state management hook

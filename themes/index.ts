@@ -1,11 +1,13 @@
 import { ThemeId, ThemeDefinition, ThemeConfig } from './types';
 import { defaultTheme } from './default';
+import { engulficTheme } from './engulfic';
 
 export * from './types';
 
 // Registry holding all initialized theme definitions
 const themeRegistry: Record<string, ThemeDefinition> = {
   default: defaultTheme,
+  engulfic: engulficTheme,
 };
 
 // Registers a theme definition dynamically

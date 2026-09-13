@@ -1,6 +1,6 @@
 import React from 'react';
 
-export type ThemeId = 'default' | 'luxury-1';
+export type ThemeId = 'default' | 'luxury-1' | 'engulfic';
 
 export interface ThemeColors {
   primary: string;

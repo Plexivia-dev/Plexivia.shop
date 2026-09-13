@@ -1,25 +1,26 @@
-import React, { useEffect } from 'react';
+﻿import React, { useEffect } from 'react';
 import { useStore } from './store/useStore';
-import { Header } from './components/header/Header';
-import { Footer } from './components/footer/Footer';
-import { HomePage } from './components/home/HomePage';
-import { ShopPage } from './components/pages/ShopPage';
-import { ProductDetailsPage } from './components/pages/ProductDetailsPage';
+import { useThemeStore } from './store/useThemeStore';
+import { getTheme } from '@themes/index';
 import { OffersPage } from './components/pages/OffersPage';
 import { AboutPage } from './components/pages/AboutPage';
 import { ContactPage } from './components/pages/ContactPage';
 import { WishlistPage } from './components/pages/WishlistPage';
-import { CheckoutPage } from './components/pages/CheckoutPage';
-import { CartDrawer } from './components/cart/CartDrawer';
-import { ProfileModal } from './components/auth/ProfileModal';
-import { SearchModal } from './components/common/SearchModal';
-import { CalendarModal } from './components/common/CalendarModal';
-import { AiChatbot } from './components/chat/AiChatbot';
-import { Toast } from './components/common/Toast';
+import { ThemeSwitcher } from './components/common/ThemeSwitcher';
 
-// Root storefront application managing page routing, site config initialization, and modals
+// Root storefront application dynamically rendering active theme components with seamless switching
 const App: React.FC = () => {
   const { activePage, fetchProducts, fetchCategories, fetchSiteConfig } = useStore();
+  const { currentTheme } = useThemeStore();
+
+  const themeDefinition = getTheme(currentTheme);
+  const {
+    Layout,
+    HomePage,
+    ShopPage,
+    ProductDetailsPage,
+    CheckoutPage,
+  } = themeDefinition.components;
 
   useEffect(() => {
     fetchSiteConfig();
@@ -32,9 +33,7 @@ const App: React.FC = () => {
   }, [activePage]);
 
   return (
-    <div className="min-h-screen bg-[#0C1618] text-[#F5F7F7] flex flex-col font-sans selection:bg-[#58C1C3]/30 selection:text-[#58C1C3]">
-      <Toast />
-      <Header />
+    <Layout>
       <main className="flex-1 w-full">
         {activePage === 'home' && <HomePage />}
         {activePage === 'shop' && <ShopPage />}
@@ -45,15 +44,9 @@ const App: React.FC = () => {
         {activePage === 'wishlist' && <WishlistPage />}
         {activePage === 'checkout' && <CheckoutPage />}
       </main>
-      <Footer />
-      <CartDrawer />
-      <ProfileModal />
-      <SearchModal />
-      <CalendarModal />
-      <AiChatbot />
-    </div>
+      <ThemeSwitcher />
+    </Layout>
   );
 };
 
 export default App;
-
